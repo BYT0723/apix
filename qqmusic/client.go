@@ -1,6 +1,7 @@
 package qqmusic
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -34,7 +35,7 @@ func NewClient(cookie string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) GetUserSongList() {
+func (c *Client) GetUserSongList() (*UserSongListResponse, error) {
 	var resp Response[UserSongListResponse]
 	if err := c.do(
 		http.MethodGet,
@@ -56,9 +57,34 @@ func (c *Client) GetUserSongList() {
 		},
 		&resp,
 	); err != nil {
-		panic(err)
+		return nil, err
 	}
-	fmt.Printf("resp: %v\n", resp)
+	if resp.Code != 0 {
+		return nil, fmt.Errorf("response code %d: %s", resp.Code, resp.Message)
+	}
+	return &resp.Data, nil
+}
+
+func (c *Client) GetSongList(tid int) (*SongListResponse, error) {
+	var resp SongListResponse
+	if err := c.do(
+		http.MethodGet,
+		"http://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg",
+		http.Header{"Referer": []string{"https://y.qq.com/yqq/playlist"}},
+		map[string]any{
+			"type":     1,
+			"utf8":     1,
+			"disstid":  tid,
+			"loginUin": 0,
+		},
+		&resp,
+	); err != nil {
+		return nil, err
+	}
+	if resp.Code != 0 {
+		return nil, fmt.Errorf("response code %d", resp.Code)
+	}
+	return &resp, nil
 }
 
 func (c *Client) do(method, url string, header http.Header, payload map[string]any, response any) error {
@@ -75,6 +101,16 @@ func (c *Client) do(method, url string, header http.Header, payload map[string]a
 	if resp.Code != http.StatusOK {
 		return errors.New("resp code not OK")
 	}
-
-	return json.Unmarshal(resp.Body, response)
+	switch v := response.(type) {
+	case *[]byte:
+		*v = resp.Body
+	default:
+		resp.Body = bytes.TrimSpace(resp.Body)
+		if bytes.HasPrefix(resp.Body, []byte("jsonCallback(")) {
+			resp.Body = resp.Body[13 : len(resp.Body)-1]
+		}
+		fmt.Printf("resp.Body: %s\n", resp.Body)
+		return json.Unmarshal(resp.Body, response)
+	}
+	return nil
 }
