@@ -3,12 +3,12 @@ package qqmusic
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/BYT0723/apix/utils"
 )
 
 func TestClient(t *testing.T) {
@@ -64,7 +64,7 @@ func TestClient(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if err := download(addr, filepath.Join(sdir, nameBuilder.String()+st.Suffix())); err != nil {
+			if err := utils.Download(addr, filepath.Join(sdir, nameBuilder.String()+st.Suffix())); err != nil {
 				t.Fatal(err)
 			}
 
@@ -78,25 +78,4 @@ func TestClient(t *testing.T) {
 			fmt.Println(nameBuilder.String(), "Downloaded.")
 		}
 	}
-}
-
-func download(url string, filepath string) (err error) {
-	f, err := os.OpenFile(filepath, os.O_CREATE|os.O_WRONLY, os.ModePerm)
-	if err != nil {
-		return
-	}
-	defer f.Close()
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf("status code error: %d", resp.StatusCode)
-		return
-	}
-	_, err = io.Copy(f, resp.Body)
-	return
 }
