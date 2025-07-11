@@ -9,6 +9,7 @@ type WallpaperResponse struct {
 			ContentClass         int    `json:"content_class,omitempty"`
 			ContentDesc          string `json:"content_desc,omitempty"`
 			ContentID            string `json:"content_id,omitempty"`
+			FatherContentID      string `json:"father_content_id,omitempty"`
 			ContentLabelInfoList []struct {
 				LabelID   string `json:"label_id,omitempty"`
 				LabelName string `json:"label_name,omitempty"`

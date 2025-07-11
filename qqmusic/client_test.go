@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/BYT0723/apix/utils"
+	"github.com/BYT0723/go-tools/transport/httpx"
 )
 
 func TestClient(t *testing.T) {
@@ -64,7 +64,7 @@ func TestClient(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if err := utils.Download(addr, filepath.Join(sdir, nameBuilder.String()+st.Suffix())); err != nil {
+			if err := httpx.Download(addr, filepath.Join(sdir, nameBuilder.String()+st.Suffix())); err != nil {
 				t.Fatal(err)
 			}
 
