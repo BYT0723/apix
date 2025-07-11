@@ -120,7 +120,7 @@ func (c *Client) GetSongUrl(mid, mediaId string, t SongType) (url string, err er
 		err = fmt.Errorf("response code %d", resp.Req0.Code)
 		return
 	}
-	if len(resp.Req0.Data.Midurlinfo) == 0 {
+	if len(resp.Req0.Data.Midurlinfo) == 0 || resp.Req0.Data.Midurlinfo[0].Purl == "" {
 		err = errors.New("获取链接失败")
 		return
 	}
