@@ -90,45 +90,47 @@ func (c *Client) GetSongUrl(mid, mediaId string, t SongType) (url string, err er
 		return
 	}
 
-	if err = c.do(
-		http.MethodGet,
-		"https://u.y.qq.com/cgi-bin/musicu.fcg",
-		nil,
-		map[string]any{
-			"-":           "getplaysongvkey",
-			"g_tk":        5381,
-			"loginUin":    c.cookies["uin"],
-			"hostUin":     0,
-			"format":      "json",
-			"inCharset":   "utf8",
-			"outCharset":  "utf-8¬ice=0",
-			"platform":    "yqq.json",
-			"needNewCode": 0,
-			"data":        string(data),
-		},
-		&resp,
-	); err != nil {
-		return
-	}
+	for range 10 {
+		if err = c.do(
+			http.MethodGet,
+			"https://u.y.qq.com/cgi-bin/musicu.fcg",
+			nil,
+			map[string]any{
+				"-":           "getplaysongvkey",
+				"g_tk":        5381,
+				"loginUin":    c.cookies["uin"],
+				"hostUin":     0,
+				"format":      "json",
+				"inCharset":   "utf8",
+				"outCharset":  "utf-8¬ice=0",
+				"platform":    "yqq.json",
+				"needNewCode": 0,
+				"data":        string(data),
+			},
+			&resp,
+		); err != nil {
+			return
+		}
 
-	if resp.Code != 0 {
-		err = fmt.Errorf("response code %d", resp.Code)
-		return
-	}
+		if resp.Code != 0 {
+			err = fmt.Errorf("response code %d", resp.Code)
+			return
+		}
 
-	if resp.Req0.Code != 0 {
-		err = fmt.Errorf("response code %d", resp.Req0.Code)
-		return
-	}
-	if len(resp.Req0.Data.Midurlinfo) == 0 || resp.Req0.Data.Midurlinfo[0].Purl == "" {
-		err = errors.New("获取链接失败")
-		return
-	}
+		if resp.Req0.Code != 0 {
+			err = fmt.Errorf("response code %d", resp.Req0.Code)
+			return
+		}
+		if len(resp.Req0.Data.Midurlinfo) == 0 || resp.Req0.Data.Midurlinfo[0].Purl == "" {
+			continue
+		}
 
-	index := slices.IndexFunc(resp.Req0.Data.Sip, func(s string) bool {
-		return !strings.HasPrefix(s, "http://ws")
-	})
-	return resp.Req0.Data.Sip[max(0, index)] + resp.Req0.Data.Midurlinfo[0].Purl, nil
+		index := slices.IndexFunc(resp.Req0.Data.Sip, func(s string) bool {
+			return !strings.HasPrefix(s, "http://ws")
+		})
+		return resp.Req0.Data.Sip[max(0, index)] + resp.Req0.Data.Midurlinfo[0].Purl, nil
+	}
+	return "", errors.New("获取链接失败")
 }
 
 func (c *Client) GetSongLyric(mid string) (lyric, trans []byte, err error) {
