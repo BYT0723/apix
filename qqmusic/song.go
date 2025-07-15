@@ -5,10 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"slices"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -61,8 +59,6 @@ func (c *Client) GetSongUrl(mid, mediaId string, t SongType) (url string, err er
 	if mediaId == "" {
 		mediaId = mid
 	}
-	// 用当前时间做随机种子，不然每次都是一样的
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	data, err := json.Marshal(map[string]any{
 		"req_0": map[string]any{
@@ -70,7 +66,7 @@ func (c *Client) GetSongUrl(mid, mediaId string, t SongType) (url string, err er
 			"method": "CgiGetVkey",
 			"param": map[string]any{
 				"filename":  []string{fmt.Sprintf("%s%s%s%s", t.Prefix(), mid, mediaId, t.Suffix())},
-				"guid":      strconv.Itoa(r.Intn(10000000)),
+				"guid":      c.guid,
 				"songmid":   []string{mid},
 				"songtype":  []int{0},
 				"uin":       c.cookies["uin"],

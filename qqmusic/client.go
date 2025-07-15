@@ -6,7 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"maps"
+	"math/rand"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/BYT0723/go-tools/transport/httpx"
 )
@@ -15,6 +18,7 @@ type Client struct {
 	cli     *httpx.Client
 	cookie  string
 	cookies map[string]string
+	guid    string
 }
 
 func NewClient(cookie string) (*Client, error) {
@@ -28,10 +32,13 @@ func NewClient(cookie string) (*Client, error) {
 		cookies[v.Name] = v.Value
 	}
 
+	// 用当前时间做随机种子，不然每次都是一样的
+
 	return &Client{
 		cli:     httpx.NewClient(),
 		cookie:  cookie,
 		cookies: cookies,
+		guid:    strconv.Itoa(rand.New(rand.NewSource(time.Now().UnixNano())).Int()),
 	}, nil
 }
 
