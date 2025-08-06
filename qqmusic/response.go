@@ -202,3 +202,173 @@ type (
 		Name string `json:"name,omitempty"`
 	}
 )
+
+type UserDetailResponse struct {
+	Code int `json:"code,omitempty"`
+	Data struct {
+		Creator struct {
+			Backpic struct {
+				Picurl string `json:"picurl,omitempty"`
+				Title  string `json:"title,omitempty"`
+				Type   int    `json:"type,omitempty"`
+			} `json:"backpic,omitempty"`
+			BuyLock int `json:"buy_lock,omitempty"`
+			Cfinfo  struct {
+				CfinfoBykey struct {
+					UrlKey    string `json:"url_key,omitempty"`
+					UrlParams string `json:"url_params,omitempty"`
+				} `json:"cfinfo_bykey,omitempty"`
+				Jumpkey string `json:"jumpkey,omitempty"`
+				Jumpurl string `json:"jumpurl,omitempty"`
+				Similar int    `json:"similar,omitempty"`
+				Title   string `json:"title,omitempty"`
+			} `json:"cfinfo,omitempty"`
+			DissLock    int    `json:"diss_lock,omitempty"`
+			EncryptUin  string `json:"encrypt_uin,omitempty"`
+			Extra       string `json:"extra,omitempty"`
+			FavLock     int    `json:"fav_lock,omitempty"`
+			Forbidden   int    `json:"forbidden,omitempty"`
+			Headpic     string `json:"headpic,omitempty"`
+			Ifpic       string `json:"ifpic,omitempty"`
+			IsBindWeibo int    `json:"is_bind_weibo,omitempty"`
+			Isfollow    int    `json:"isfollow,omitempty"`
+			Ishost      int    `json:"ishost,omitempty"`
+			Islock      int    `json:"islock,omitempty"`
+			Jumpkey     string `json:"jumpkey,omitempty"`
+			Listeninfo  struct {
+				Iconurl     string `json:"iconurl,omitempty"`
+				Jumpkey     string `json:"jumpkey,omitempty"`
+				Jumpurl     string `json:"jumpurl,omitempty"`
+				ListenBykey struct {
+					UrlKey    string `json:"url_key,omitempty"`
+					UrlParams string `json:"url_params,omitempty"`
+				} `json:"listen_bykey,omitempty"`
+			} `json:"listeninfo,omitempty"`
+			Lvinfo []struct {
+				Iconurl     string `json:"iconurl,omitempty"`
+				Jumpkey     string `json:"jumpkey,omitempty"`
+				Jumpurl     string `json:"jumpurl,omitempty"`
+				LvinfoBykey struct {
+					UrlKey    string `json:"url_key,omitempty"`
+					UrlParams string `json:"url_params,omitempty"`
+				} `json:"lvinfo_bykey,omitempty"`
+			} `json:"lvinfo,omitempty"`
+			Medal struct {
+				Flag       int    `json:"flag,omitempty"`
+				Iconurl    string `json:"iconurl,omitempty"`
+				Jumpkey    string `json:"jumpkey,omitempty"`
+				Jumpurl    string `json:"jumpurl,omitempty"`
+				MedalBykey struct {
+					UrlKey    string `json:"url_key,omitempty"`
+					UrlParams string `json:"url_params,omitempty"`
+				} `json:"medal_bykey,omitempty"`
+			} `json:"medal,omitempty"`
+			Nick string `json:"nick,omitempty"`
+			Nums struct {
+				Fansnum         int `json:"fansnum,omitempty"`
+				Follownum       int `json:"follownum,omitempty"`
+				Followsingernum int `json:"followsingernum,omitempty"`
+				Followusernum   int `json:"followusernum,omitempty"`
+				Frdnum          int `json:"frdnum,omitempty"`
+				Visitornum      int `json:"visitornum,omitempty"`
+			} `json:"nums,omitempty"`
+			ShareBykey struct {
+				UrlKey    string `json:"url_key,omitempty"`
+				UrlParams string `json:"url_params,omitempty"`
+			} `json:"share_bykey,omitempty"`
+			Shareurl   string `json:"shareurl,omitempty"`
+			Singerinfo struct {
+				Singerid int `json:"singerid,omitempty"`
+			} `json:"singerinfo,omitempty"`
+			Typeinfo struct {
+				CfinfoBykey struct {
+					UrlKey    string `json:"url_key,omitempty"`
+					UrlParams string `json:"url_params,omitempty"`
+				} `json:"cfinfo_bykey,omitempty"`
+				Iconurl string `json:"iconurl,omitempty"`
+				Jumpkey string `json:"jumpkey,omitempty"`
+				Jumpurl string `json:"jumpurl,omitempty"`
+				Type    int    `json:"type,omitempty"`
+			} `json:"typeinfo,omitempty"`
+			Uin        int    `json:"uin,omitempty"`
+			UinWeb     string `json:"uin_web,omitempty"`
+			UserInfoUI struct {
+				Iconlist []struct {
+					Desc   string `json:"desc,omitempty"`
+					Ext    string `json:"ext,omitempty"`
+					Height int    `json:"height,omitempty"`
+					SrcUrl string `json:"srcUrl,omitempty"`
+					Style  string `json:"style,omitempty"`
+					Width  int    `json:"width,omitempty"`
+				} `json:"iconlist,omitempty"`
+				Nickname struct {
+					DarkColor  string `json:"darkColor,omitempty"`
+					LightColor string `json:"lightColor,omitempty"`
+				} `json:"nickname,omitempty"`
+			} `json:"userInfoUI,omitempty"`
+			WeiboNick string `json:"weibo_nick,omitempty"`
+			WeiboUid  string `json:"weibo_uid,omitempty"`
+		} `json:"creator,omitempty"`
+		Myarticle struct {
+			Jumpkey  string        `json:"jumpkey,omitempty"`
+			Jumpurl  string        `json:"jumpurl,omitempty"`
+			Laypic   string        `json:"laypic,omitempty"`
+			List     []interface{} `json:"list,omitempty"`
+			Title    string        `json:"title,omitempty"`
+			Totalcnt int           `json:"totalcnt,omitempty"`
+		} `json:"myarticle,omitempty"`
+		Mydiss struct {
+			Jumpurl string `json:"jumpurl,omitempty"`
+			Laypic  string `json:"laypic,omitempty"`
+			List    []struct {
+				DirShow  int    `json:"dir_show,omitempty"`
+				Dirid    int    `json:"dirid,omitempty"`
+				Dissid   int    `json:"dissid,omitempty"`
+				Icontype int    `json:"icontype,omitempty"`
+				Iconurl  string `json:"iconurl,omitempty"`
+				Isshow   int    `json:"isshow,omitempty"`
+				Picurl   string `json:"picurl,omitempty"`
+				Subtitle string `json:"subtitle,omitempty"`
+				Title    string `json:"title,omitempty"`
+			} `json:"list,omitempty"`
+			Num   int    `json:"num,omitempty"`
+			Title string `json:"title,omitempty"`
+		} `json:"mydiss,omitempty"`
+		Mymusic []struct {
+			ID         string `json:"id,omitempty"`
+			Jumpkey    string `json:"jumpkey,omitempty"`
+			Jumptype   int    `json:"jumptype,omitempty"`
+			Jumpurl    string `json:"jumpurl,omitempty"`
+			Laypic     string `json:"laypic,omitempty"`
+			MusicBykey struct {
+				UrlKey    string `json:"url_key,omitempty"`
+				UrlParams string `json:"url_params,omitempty"`
+			} `json:"music_bykey,omitempty"`
+			Num0     int    `json:"num0,omitempty"`
+			Num1     int    `json:"num1,omitempty"`
+			Num2     int    `json:"num2,omitempty"`
+			Picurl   string `json:"picurl,omitempty"`
+			Subtitle string `json:"subtitle,omitempty"`
+			Title    string `json:"title,omitempty"`
+			Type     int    `json:"type,omitempty"`
+		} `json:"mymusic,omitempty"`
+		Mymusictype string `json:"mymusictype,omitempty"`
+		Myradio     struct {
+			Jumpkey  string        `json:"jumpkey,omitempty"`
+			Jumpurl  string        `json:"jumpurl,omitempty"`
+			Laypic   string        `json:"laypic,omitempty"`
+			List     []interface{} `json:"list,omitempty"`
+			Title    string        `json:"title,omitempty"`
+			Totalcnt int           `json:"totalcnt,omitempty"`
+		} `json:"myradio,omitempty"`
+		Video struct {
+			Jumpkey string        `json:"jumpkey,omitempty"`
+			Jumpurl string        `json:"jumpurl,omitempty"`
+			List    []interface{} `json:"list,omitempty"`
+			Num     int           `json:"num,omitempty"`
+			Title   string        `json:"title,omitempty"`
+		} `json:"video,omitempty"`
+	} `json:"data,omitempty"`
+	Msg     string `json:"msg,omitempty"`
+	Subcode int    `json:"subcode,omitempty"`
+}
