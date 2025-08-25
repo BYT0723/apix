@@ -9,6 +9,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/tidwall/gjson"
 )
 
 type SongType int
@@ -160,5 +162,46 @@ func (c *Client) GetSongLyric(mid string) (lyric, trans []byte, err error) {
 
 	lyric, _ = base64.StdEncoding.DecodeString(resp.Lyric)
 	trans, _ = base64.StdEncoding.DecodeString(resp.Trans)
+	return
+}
+
+func (c *Client) GetAlbumArtBySongMid(mid string) (url string,err error) {
+	var resp []byte
+
+	data, err := json.Marshal(map[string]any{
+		"songinfo": map[string]any{
+			"method": "get_song_detail_yqq",
+			"module": "music.pf_song_detail_svr",
+			"param": map[string]any{
+				"song_mid": mid,
+			},
+		},
+	})
+	if err != nil {
+		return
+	}
+
+	if err = c.do(
+		http.MethodGet,
+		"http://u.y.qq.com/cgi-bin/musicu.fcg",
+		http.Header{
+			"Referer": []string{"https://y.qq.com"},
+		},
+		map[string]any{
+			"data": string(data),
+		},
+		&resp,
+	); err != nil {
+		return
+	}
+
+	albumMid := gjson.GetBytes(resp, "songinfo.data.track_info.album.mid")
+	if !albumMid.Exists() {
+		err = errors.New("获取专辑信息失败")
+		return
+	}
+
+	url = fmt.Sprintf("https://y.gtimg.cn/music/photo_new/T002R300x300M000%s.jpg",albumMid.String())
+
 	return
 }
