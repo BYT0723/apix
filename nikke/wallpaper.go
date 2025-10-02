@@ -1,6 +1,7 @@
 package nikke
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -12,7 +13,7 @@ import (
 	"github.com/BYT0723/go-tools/transport/httpx"
 )
 
-func GetStaticWallpaperUrls() (urls []string, err error) {
+func GetStaticWallpaper() (infos []*WallpaperInfo, err error) {
 	var (
 		offset, size = 0, 12
 		total        int
@@ -51,9 +52,10 @@ func GetStaticWallpaperUrls() (urls []string, err error) {
 			return fmt.Errorf("response code %d: %s", result.Code, result.Msg)
 		}
 		for _, pic := range result.Data.InfoContent {
-			if u := pic.JumpLinkInfo.JumpURL; u != "" {
-				urls = append(urls, u)
-			}
+			infos = append(infos, &WallpaperInfo{
+				ContentID: pic.ContentID,
+				Urls:      pic.PicUrls,
+			})
 		}
 		offset += size
 		if total == 0 {
@@ -64,13 +66,13 @@ func GetStaticWallpaperUrls() (urls []string, err error) {
 	}
 	for total == 0 || offset < total {
 		if err = once(); err != nil {
-			return
+			return infos, err
 		}
 	}
-	return
+	return infos, err
 }
 
-func GetLiveWallpaperUrls() (urls []string, err error) {
+func GetLiveWallpaperInfo() (infos []*WallpaperInfo, err error) {
 	var (
 		offset, size = 0, 12
 		total        int
@@ -108,8 +110,11 @@ func GetLiveWallpaperUrls() (urls []string, err error) {
 			return fmt.Errorf("response code %d: %s", result.Code, result.Msg)
 		}
 		for _, live := range result.Data.InfoContent {
-			if u := live.JumpLinkInfo.JumpURL; u != "" {
-				urls = append(urls, u)
+			if u := strings.TrimSpace(live.JumpLinkInfo.JumpURL); u != "" {
+				infos = append(infos, &WallpaperInfo{
+					ContentID: live.ContentID,
+					Urls:      []string{u},
+				})
 			}
 		}
 		offset += size
@@ -121,16 +126,16 @@ func GetLiveWallpaperUrls() (urls []string, err error) {
 
 	for total == 0 || offset < total {
 		if err = once(); err != nil {
-			return
+			return infos, err
 		}
 	}
-	return
+	return infos, err
 }
 
 type DownloadFailed struct {
-	Index int
-	URL   string
-	Err   error
+	ID  string
+	URL string
+	Err error
 }
 
 func DownloadStaticWallpapers(dir string, gcount int) (result []DownloadFailed) {
@@ -144,37 +149,45 @@ func DownloadStaticWallpapers(dir string, gcount int) (result []DownloadFailed) 
 	)
 	os.MkdirAll(dir, os.ModePerm)
 
-	urls, err := GetStaticWallpaperUrls()
+	infos, err := GetStaticWallpaper()
 	if err != nil {
 		panic(err)
 	}
-	for i, url := range urls {
+	for _, info := range infos {
+		if len(info.Urls) == 0 {
+			result = append(result, DownloadFailed{ID: info.ContentID, Err: errors.New("no url")})
+			continue
+		}
+
 		wg.Add(1)
 
 		ch <- struct{}{}
 
-		go func(i int, url string) {
+		go func(info *WallpaperInfo) {
 			defer func() {
 				<-ch
 				wg.Done()
 			}()
 			var (
-				path = filepath.Join(dir, fmt.Sprintf("nikke-%d.jpeg", i+1))
+				path = filepath.Join(dir, fmt.Sprintf("nikke-%s.jpeg", info.ContentID))
 				err  error
 			)
+			if _, err := os.Stat(path); err == nil {
+				return
+			}
 
 			for range retry {
-				if err = httpx.Download(url, path); err == nil {
+				if err = httpx.Download(info.Urls[0], path); err == nil {
 					break
 				}
 			}
 			if err != nil {
-				result = append(result, DownloadFailed{Index: i, URL: url, Err: err})
+				result = append(result, DownloadFailed{ID: info.ContentID, URL: info.Urls[0], Err: err})
 			}
-		}(i, url)
+		}(info)
 	}
 	wg.Wait()
-	return
+	return result
 }
 
 func DownloadLiveWallpapers(dir string, gcount int, uncompress bool) (result []DownloadFailed) {
@@ -188,38 +201,46 @@ func DownloadLiveWallpapers(dir string, gcount int, uncompress bool) (result []D
 	)
 	os.MkdirAll(dir, os.ModePerm)
 
-	urls, err := GetLiveWallpaperUrls()
+	infos, err := GetLiveWallpaperInfo()
 	if err != nil {
 		panic(err)
 	}
-	for i, url := range urls {
+	for _, info := range infos {
+		if len(info.Urls) == 0 {
+			result = append(result, DownloadFailed{ID: info.ContentID, Err: errors.New("no url")})
+			continue
+		}
 		wg.Add(1)
 
 		ch <- struct{}{}
 
-		go func(i int, url string) {
+		go func(info *WallpaperInfo) {
 			defer func() {
 				<-ch
 				wg.Done()
 			}()
 			var (
-				path = filepath.Join(dir, fmt.Sprintf("nikke-live-%d.zip", i+1))
+				path = filepath.Join(dir, fmt.Sprintf("nikke-live-%s.zip", info.ContentID))
 				err  error
 			)
+			if _, err := os.Stat(path); err == nil {
+				return
+			}
 
 			for range retry {
-				if err = httpx.Download(url, path); err == nil {
+				if err = httpx.Download(info.Urls[0], path); err == nil {
 					break
 				}
 			}
 			if err != nil {
-				result = append(result, DownloadFailed{Index: i, URL: url, Err: err})
+				result = append(result, DownloadFailed{ID: info.ContentID, URL: info.Urls[0], Err: err})
+				return
 			}
 			if uncompress {
 				packer.Unzip(path, strings.TrimSuffix(path, ".zip"))
 			}
-		}(i, url)
+		}(info)
 	}
 	wg.Wait()
-	return
+	return result
 }

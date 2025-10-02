@@ -36,3 +36,8 @@ type WallpaperResponse struct {
 	Msg       string `json:"msg,omitempty"`
 	RequestID string `json:"request_id,omitempty"`
 }
+
+type WallpaperInfo struct {
+	ContentID string
+	Urls      []string
+}
