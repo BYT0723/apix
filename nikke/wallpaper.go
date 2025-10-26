@@ -219,14 +219,19 @@ type DownloadFailed struct {
 	Err error
 }
 
-func DownloadStaticWallpapers(_type WallpaperType, dir string, gcount int) (result []DownloadFailed) {
-	if gcount == 0 {
-		gcount = 5
+var defaultParams = params{
+	gcount: 12,
+	retry:  3,
+}
+
+func DownloadStaticWallpapers(_type WallpaperType, dir string, opts ...Option) (result []DownloadFailed) {
+	params := defaultParams
+	for _, o := range opts {
+		o(&params)
 	}
 	var (
-		ch    = make(chan struct{}, gcount)
-		wg    sync.WaitGroup
-		retry = 5
+		ch = make(chan struct{}, params.gcount)
+		wg sync.WaitGroup
 	)
 	os.MkdirAll(dir, os.ModePerm)
 
@@ -257,7 +262,7 @@ func DownloadStaticWallpapers(_type WallpaperType, dir string, gcount int) (resu
 				return
 			}
 
-			for range retry {
+			for range params.retry {
 				if err = httpx.Download(info.Urls[0], path); err == nil {
 					break
 				}
@@ -271,14 +276,15 @@ func DownloadStaticWallpapers(_type WallpaperType, dir string, gcount int) (resu
 	return result
 }
 
-func DownloadLiveWallpapers(dir string, gcount int, uncompress bool) (result []DownloadFailed) {
-	if gcount == 0 {
-		gcount = 5
+func DownloadLiveWallpapers(dir string, opts ...Option) (result []DownloadFailed) {
+	params := defaultParams
+	for _, o := range opts {
+		o(&params)
 	}
+
 	var (
-		ch    = make(chan struct{}, gcount)
-		wg    sync.WaitGroup
-		retry = 5
+		ch = make(chan struct{}, params.gcount)
+		wg sync.WaitGroup
 	)
 	os.MkdirAll(dir, os.ModePerm)
 
@@ -308,7 +314,7 @@ func DownloadLiveWallpapers(dir string, gcount int, uncompress bool) (result []D
 				return
 			}
 
-			for range retry {
+			for range params.retry {
 				if err = httpx.Download(info.Urls[0], path); err == nil {
 					break
 				}
@@ -317,7 +323,7 @@ func DownloadLiveWallpapers(dir string, gcount int, uncompress bool) (result []D
 				result = append(result, DownloadFailed{ID: info.ContentID, URL: info.Urls[0], Err: err})
 				return
 			}
-			if uncompress {
+			if params.uncompress {
 				packer.Unzip(path, strings.TrimSuffix(path, ".zip"))
 			}
 		}(info)
@@ -326,14 +332,16 @@ func DownloadLiveWallpapers(dir string, gcount int, uncompress bool) (result []D
 	return result
 }
 
-func DownloadAvatars(dir string, gcount int) (result []DownloadFailed) {
-	if gcount == 0 {
-		gcount = 5
+func DownloadAvatars(dir string, opts ...Option) (result []DownloadFailed) {
+	params := defaultParams
+
+	for _, o := range opts {
+		o(&params)
 	}
+
 	var (
-		ch    = make(chan struct{}, gcount)
-		wg    sync.WaitGroup
-		retry = 5
+		ch = make(chan struct{}, params.gcount)
+		wg sync.WaitGroup
 	)
 	os.MkdirAll(dir, os.ModePerm)
 
@@ -364,7 +372,7 @@ func DownloadAvatars(dir string, gcount int) (result []DownloadFailed) {
 				return
 			}
 
-			for range retry {
+			for range params.retry {
 				if err = httpx.Download(info.Urls[0], path); err == nil {
 					break
 				}
