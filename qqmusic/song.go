@@ -5,13 +5,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"slices"
 	"strings"
 	"time"
 
+	"github.com/BYT0723/go-tools/ds"
 	"github.com/tidwall/gjson"
 )
+
+var ErrGetSongUrlFailed = errors.New("获取链接失败")
 
 type SongType int
 
@@ -22,6 +26,31 @@ const (
 	SongTypeAPE
 	SongTypeFLAC
 )
+
+func (t SongType) String() string {
+	switch t {
+	case SongTypeM4A:
+		return "m4a"
+	case SongType128:
+		return "128"
+	case SongType320:
+		return "320"
+	case SongTypeAPE:
+		return "ape"
+	case SongTypeFLAC:
+		return "flac"
+	}
+	return ""
+}
+
+// 如果指定类型无法获取链接则按照此顺序尝试
+var songTypes = []SongType{
+	SongTypeFLAC,
+	SongTypeAPE,
+	SongType320,
+	SongType128,
+	SongTypeM4A,
+}
 
 func (t SongType) Suffix() string {
 	switch t {
@@ -55,7 +84,35 @@ func (t SongType) Prefix() string {
 	return ""
 }
 
-func (c *Client) GetSongUrl(mid, mediaId string, t SongType) (url string, err error) {
+var random = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+func (c *Client) GetSongUrl(mid, mediaId string, t SongType) (string, SongType, error) {
+	tset := ds.NewHashSet[SongType]()
+
+	url, rt, err := c.getSongUrl(mid, mediaId, t)
+	if err == nil {
+		return url, rt, err
+	}
+
+	tset.Append(t)
+
+	for _, t := range songTypes {
+		if tset.Contains(t) {
+			continue
+		}
+		tset.Append(t)
+
+		// 随机睡眠1s - 3s
+		time.Sleep(time.Duration(random.Int63n(2000)+1000) * time.Millisecond)
+
+		if url, rt, err := c.getSongUrl(mid, mediaId, t); err == nil {
+			return url, rt, err
+		}
+	}
+	return "", 0, ErrGetSongUrlFailed
+}
+
+func (c *Client) getSongUrl(mid, mediaId string, t SongType) (url string, rt SongType, err error) {
 	var resp SongUrlResponse
 
 	if mediaId == "" {
@@ -126,9 +183,11 @@ func (c *Client) GetSongUrl(mid, mediaId string, t SongType) (url string, err er
 		index := slices.IndexFunc(resp.Req0.Data.Sip, func(s string) bool {
 			return !strings.HasPrefix(s, "http://ws")
 		})
-		return resp.Req0.Data.Sip[max(0, index)] + resp.Req0.Data.Midurlinfo[0].Purl, nil
+		url = resp.Req0.Data.Sip[max(0, index)] + resp.Req0.Data.Midurlinfo[0].Purl
+		return
 	}
-	return "", errors.New("获取链接失败")
+	err = ErrGetSongUrlFailed
+	return
 }
 
 func (c *Client) GetSongLyric(mid string) (lyric, trans []byte, err error) {
@@ -165,7 +224,7 @@ func (c *Client) GetSongLyric(mid string) (lyric, trans []byte, err error) {
 	return
 }
 
-func (c *Client) GetAlbumArtBySongMid(mid string) (url string,err error) {
+func (c *Client) GetAlbumArtBySongMid(mid string) (url string, err error) {
 	var resp []byte
 
 	data, err := json.Marshal(map[string]any{
@@ -201,7 +260,7 @@ func (c *Client) GetAlbumArtBySongMid(mid string) (url string,err error) {
 		return
 	}
 
-	url = fmt.Sprintf("https://y.gtimg.cn/music/photo_new/T002R300x300M000%s.jpg",albumMid.String())
+	url = fmt.Sprintf("https://y.gtimg.cn/music/photo_new/T002R300x300M000%s.jpg", albumMid.String())
 
 	return
 }

@@ -59,7 +59,7 @@ func TestClient(t *testing.T) {
 					nameBuilder.WriteString(",")
 				}
 			}
-			addr, err := c.GetSongUrl(s.Songmid, s.StrMediaMid, st)
+			addr, _, err := c.GetSongUrl(s.Songmid, s.StrMediaMid, st)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -78,4 +78,26 @@ func TestClient(t *testing.T) {
 			fmt.Println(nameBuilder.String(), "Downloaded.")
 		}
 	}
+}
+
+func TestGetSongUrl(t *testing.T) {
+	b, err := os.ReadFile("cookie.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, err := NewClient(string(bytes.TrimSpace(b)))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	st := SongType320
+
+	url, rt, err := c.GetSongUrl("004OOi8q40bXLF", "004Yfu8u1RwskJ", st)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rt != st {
+		fmt.Printf("song type not %s, is %s\n", st, rt)
+	}
+	fmt.Printf("url: %v\n", url)
 }
