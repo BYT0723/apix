@@ -3,7 +3,7 @@ module github.com/BYT0723/apix
 go 1.24.4
 
 require (
-	github.com/BYT0723/go-tools v0.0.34
+	github.com/BYT0723/go-tools v0.0.35-0.20251210174817-b8f9b3203e31
 	github.com/tidwall/gjson v1.18.0
 )
 

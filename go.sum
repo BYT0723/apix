@@ -1,5 +1,5 @@
-github.com/BYT0723/go-tools v0.0.34 h1:I4oPk2AfKV/spDmaLIXh4DV+GTIMP7kdi7c2wrQDmgA=
-github.com/BYT0723/go-tools v0.0.34/go.mod h1:cUIjTnFul0RC52Yes70k5z65vFpDmY58FGrT7V79CO4=
+github.com/BYT0723/go-tools v0.0.35-0.20251210174817-b8f9b3203e31 h1:PbxSje52J9KHsbYbtG2G7NyExY7pyodMm1uW4QP5ekU=
+github.com/BYT0723/go-tools v0.0.35-0.20251210174817-b8f9b3203e31/go.mod h1:cUIjTnFul0RC52Yes70k5z65vFpDmY58FGrT7V79CO4=
 github.com/andybalholm/brotli v1.2.0 h1:ukwgCxwYrmACq68yiUqwIWnGY0cTPox/M94sVwToPjQ=
 github.com/andybalholm/brotli v1.2.0/go.mod h1:rzTDkvFWvIrjDXZHkuS16NPggd91W3kUSvPlQ1pLaKY=
 github.com/coreos/go-systemd/v22 v22.5.0/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=

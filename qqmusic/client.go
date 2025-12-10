@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/BYT0723/go-tools/spider"
 	"github.com/BYT0723/go-tools/transport/httpx"
 )
 
@@ -47,7 +48,7 @@ func (c *Client) do(method, url string, header http.Header, payload map[string]a
 	h.Set("Accept", "application/json")
 	h.Set("Accept-Encoding", "gzip, deflate, br")
 	h.Set("Cookie", c.cookie)
-	h.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0")
+	h.Set("User-Agent", spider.GetRandUserAgent())
 
 	if header != nil {
 		maps.Copy(h, header)
