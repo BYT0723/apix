@@ -86,12 +86,13 @@ func (t SongType) Prefix() string {
 
 var random = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-func (c *Client) GetSongUrl(mid, mediaId string, t SongType) (string, SongType, error) {
+func (c *Client) GetSongUrl(mid, mediaId string, t SongType) (url string, rt SongType, err error) {
 	tset := ds.NewHashSet[SongType]()
 
-	url, rt, err := c.getSongUrl(mid, mediaId, t)
+	url, err = c.getSongUrl(mid, mediaId, t)
 	if err == nil {
-		return url, rt, err
+		rt = t
+		return
 	}
 
 	tset.Append(t)
@@ -105,14 +106,16 @@ func (c *Client) GetSongUrl(mid, mediaId string, t SongType) (string, SongType, 
 		// 随机睡眠1s - 3s
 		time.Sleep(time.Duration(random.Int63n(2000)+1000) * time.Millisecond)
 
-		if url, rt, err := c.getSongUrl(mid, mediaId, t); err == nil {
-			return url, rt, err
+		if url, err = c.getSongUrl(mid, mediaId, t); err == nil {
+			rt = t
+			return
 		}
 	}
-	return "", 0, ErrGetSongUrlFailed
+	err = ErrGetSongUrlFailed
+	return
 }
 
-func (c *Client) getSongUrl(mid, mediaId string, t SongType) (url string, rt SongType, err error) {
+func (c *Client) getSongUrl(mid, mediaId string, t SongType) (url string, err error) {
 	var resp SongUrlResponse
 
 	if mediaId == "" {
