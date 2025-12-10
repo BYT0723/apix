@@ -16,10 +16,13 @@ import (
 )
 
 type Client struct {
-	cli     *httpx.Client
-	cookie  string
-	cookies map[string]string
-	guid    string
+	cli         *httpx.Client
+	cookie      string
+	cookies     map[string]string
+	guid        string
+	Retry       int           // for some method, eg: getSongUrl
+	Interval    time.Duration // call same method interval
+	IntervalInc time.Duration // call same method interval random increment
 }
 
 func NewClient(cookie string) (*Client, error) {
@@ -36,10 +39,13 @@ func NewClient(cookie string) (*Client, error) {
 	// 用当前时间做随机种子，不然每次都是一样的
 
 	return &Client{
-		cli:     httpx.NewClient(),
-		cookie:  cookie,
-		cookies: cookies,
-		guid:    strconv.Itoa(rand.New(rand.NewSource(time.Now().UnixNano())).Int()),
+		cli:         httpx.NewClient(),
+		cookie:      cookie,
+		cookies:     cookies,
+		guid:        strconv.Itoa(rand.New(rand.NewSource(time.Now().UnixNano())).Int()),
+		Retry:       3,
+		Interval:    500 * time.Millisecond,
+		IntervalInc: 500 * time.Millisecond,
 	}, nil
 }
 

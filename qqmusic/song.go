@@ -84,7 +84,7 @@ func (t SongType) Prefix() string {
 	return ""
 }
 
-var random = rand.New(rand.NewSource(time.Now().UnixNano()))
+var rd = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 func (c *Client) GetSongUrl(mid, mediaId string, t SongType) (url string, rt SongType, err error) {
 	tset := ds.NewHashSet[SongType]()
@@ -104,7 +104,7 @@ func (c *Client) GetSongUrl(mid, mediaId string, t SongType) (url string, rt Son
 		tset.Append(t)
 
 		// 随机睡眠1s - 3s
-		time.Sleep(time.Duration(random.Int63n(2000)+1000) * time.Millisecond)
+		time.Sleep(c.Interval + time.Duration(rd.Int63n(int64(c.IntervalInc))))
 
 		if url, err = c.getSongUrl(mid, mediaId, t); err == nil {
 			rt = t
@@ -148,7 +148,7 @@ func (c *Client) getSongUrl(mid, mediaId string, t SongType) (url string, err er
 		return
 	}
 
-	for range 10 {
+	for range c.Retry {
 		if err = c.do(
 			http.MethodGet,
 			"https://u.y.qq.com/cgi-bin/musicu.fcg",
@@ -180,6 +180,7 @@ func (c *Client) getSongUrl(mid, mediaId string, t SongType) (url string, err er
 			return
 		}
 		if len(resp.Req0.Data.Midurlinfo) == 0 || resp.Req0.Data.Midurlinfo[0].Purl == "" {
+			time.Sleep(c.Interval + time.Duration(rd.Int63n(int64(c.IntervalInc))))
 			continue
 		}
 
