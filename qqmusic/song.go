@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math/rand"
 	"net/http"
 	"slices"
@@ -266,5 +267,29 @@ func (c *Client) GetAlbumArtBySongMid(mid string) (url string, err error) {
 
 	url = fmt.Sprintf("https://y.gtimg.cn/music/photo_new/T002R300x300M000%s.jpg", albumMid.String())
 
+	return
+}
+
+func (c *Client) GetAlbumCover(albumMid string) (cover []byte, err error) {
+	artURL := fmt.Sprintf("https://y.gtimg.cn/music/photo_new/T002R300x300M000%s.jpg", albumMid)
+
+	resp, err := http.Get(artURL)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		err = errors.New("status code: " + resp.Status)
+		return
+	}
+
+	cover, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+	if len(cover) == 0 {
+		err = errors.New("empty cover")
+	}
 	return
 }
